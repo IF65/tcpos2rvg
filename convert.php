@@ -228,28 +228,28 @@ while ($data <= $dataFine) {
 								}
 							}
 						}
-
-						// inserisco il record di chiusura della giornata
-						// se arrivo qui vuol dire che tcpos ha risposto e quindi
-						// anche se la giornata è vuota devo chiuderla
-						$h_insert->execute([
-							':societa' => $societa,
-							':negozio' => $negozio,
-							':codice' => '0000000',
-							':barcode' => '',
-							':data' => $data->format('Y-m-d'),
-							':aa' => $anno,
-							':mm' => $mese,
-							':gg' => $giorno,
-							':quantita' => 0,
-							':quantitaOS' => 0,
-							':tipoPrezzo' => 'L',
-							':venduto' => 0.00,
-							':vendutoCED' => 0.00,
-							':vendutoLOC' => 0.00,
-							':vendutoOS' => 0.00
-						]);
 					}
+
+					// inserisco il record di chiusura della giornata
+					// se arrivo qui vuol dire che tcpos ha risposto e quindi
+					// anche se la giornata è vuota devo chiuderla
+					$h_insert->execute([
+						':societa' => $societa,
+						':negozio' => $negozio,
+						':codice' => '0000000',
+						':barcode' => '',
+						':data' => $data->format('Y-m-d'),
+						':aa' => $anno,
+						':mm' => $mese,
+						':gg' => $giorno,
+						':quantita' => 0,
+						':quantitaOS' => 0,
+						':tipoPrezzo' => 'L',
+						':venduto' => 0.00,
+						':vendutoCED' => 0.00,
+						':vendutoLOC' => 0.00,
+						':vendutoOS' => 0.00
+					]);
 				} catch (PDOException $e) {
 					echo "Errore: " . $e->getMessage();
 					die();
