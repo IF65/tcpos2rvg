@@ -8,8 +8,8 @@ use GuzzleHttp\Client;
 // -----------------------------------------------------------
 if ($argc == 1) {
 	$sede = '0501';
-	$dataInizio = new DateTime('2021-03-10', new DateTimeZone('Europe/Rome'));
-	$dataFine = new DateTime('2021-03-13', new DateTimeZone('Europe/Rome'));
+	$dataInizio = new DateTime('2021-04-20', new DateTimeZone('Europe/Rome'));
+	$dataFine = new DateTime('2021-04-20', new DateTimeZone('Europe/Rome'));
 } else {
 	$sede = $argv[1];
 	$dataInizio = new DateTime($argv[2], new DateTimeZone('Europe/Rome'));
@@ -20,7 +20,7 @@ if ($argc == 1) {
 	}
 }
 
-$hostname = "10.11.14.76";
+$hostname = 'localhost';//"10.11.14.76";
 $dbname = "archivi";
 $user = "root";
 $password = "mela";
@@ -92,8 +92,17 @@ while ($data <= $dataFine) {
 						$articleCode = '9960009';
 					}
 
-					$prezzo = round($article['article_price'] + $article['price_article_menu_addition'] + $article['discount'] + $article['promotion_discount'], 2);
-					$prezzoListino = round($article['article_catalog_price_unit'] * $article['quantity'], 2);
+					$articlePrice = (key_exists('article_price', $article)) ? $article['article_price'] : 0;
+					$articleMenuAddition = (key_exists('price_article_menu_addition', $article)) ? $article['price_article_menu_addition'] : 0;
+					$articleCatalogPriceUnit = (key_exists('article_catalog_price_unit', $article)) ? $article['article_catalog_price_unit'] : 0;
+
+					$articlePrice = (key_exists('price', $article)) ? $article['price'] : 0;
+					$articleMenuAddition = (key_exists('addition_article_price', $article)) ? $article['addition_article_price'] : 0;
+					$articleCatalogPriceUnit = (key_exists('article_catalog_price_unit', $article)) ? $article['article_catalog_price_unit'] : 0;
+					$articleQuantity = (key_exists('qty_weight', $article)) ? $article['qty_weight'] : 0;
+
+					$prezzo = round( $articlePrice + $articleMenuAddition + $article['discount'] + $article['promotion_discount'], 2);
+					$prezzoListino = round($articleCatalogPriceUnit * $articleQuantity, 2);
 					$sconto = 0;
 					if (round($prezzoListino - $prezzo, 2) and ($article['menu_id'] != null)) {
 						$sconto = round($prezzoListino - $prezzo, 2);
@@ -107,8 +116,8 @@ while ($data <= $dataFine) {
 					}
 
 					$temp = [
-						'quantita' => $article['quantity'] * 1,
-						'quantitaOS' => ($inPromozione) ? $article['quantity'] * 1 : 0,
+						'quantita' => $articleQuantity * 1,
+						'quantitaOS' => ($inPromozione) ? $articleQuantity * 1 : 0,
 						'venduto' => round($prezzo * 1, 2),
 						'vendutoListino' => $prezzoListino * 1,
 						'vendutoOS' => ($inPromozione) ? $prezzo * 1 : 0.00
@@ -141,7 +150,7 @@ while ($data <= $dataFine) {
 					$h_count = $db->prepare($stmt);
 					$h_count->execute([':data' => $data->format('Y-m-d'), ':societa' => $societa, ':negozio' => $negozio]);
 					$count = (int)$h_count->fetchColumn();
-					if ($count) {
+					if ( ! $count) {// debug togliere la negazione
 						// controllo che non sia presente nella giornata/negozio il record di avvenuto caricamento
 						$stmt = "   select ifnull(count(*),0) 
 		                                from archivi.riepvegi
