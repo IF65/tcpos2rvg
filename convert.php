@@ -150,7 +150,7 @@ while ($data <= $dataFine) {
 					$h_count = $db->prepare($stmt);
 					$h_count->execute([':data' => $data->format('Y-m-d'), ':societa' => $societa, ':negozio' => $negozio]);
 					$count = (int)$h_count->fetchColumn();
-					if ( ! $count) {// debug togliere la negazione
+					if ($count) {
 						// controllo che non sia presente nella giornata/negozio il record di avvenuto caricamento
 						$stmt = "   select ifnull(count(*),0) 
 		                                from archivi.riepvegi
